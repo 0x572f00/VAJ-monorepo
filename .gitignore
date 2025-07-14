@@ -1,0 +1,42 @@
+#Python (for server/ bots and AI)
+pycache/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+env/
+*.db
+*.sqlite
+*.log
+.env
+*.env
+temp/
+Pipfile.lock
+*.pkl
+
+#Vercel app (Next.js specific)
+node_modules/
+.next/
+out/
+build/
+dist/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+#OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+#Monorepo-specific ignores
+server//venv/
+server//pycache/
+server//site-packages/
+server//temp/
+server/**/build/
+app/node_modules/
+app/.next/
