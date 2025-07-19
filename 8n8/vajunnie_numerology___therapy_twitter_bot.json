@@ -2,6 +2,340 @@
   "name": "vajunnie numerology + therapy twitter bot",
   "nodes": [
     {
+      "parameters": {
+        "cronExpression": "*/15 * * * *"
+      },
+      "id": "new-schedule-id",
+      "name": "Poll Mentions Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "tweet",
+        "operation": "search",
+        "query": "@secretary_VAJ -from:@secretary_VAJ",
+        "limit": 10,
+        "additionalFields": {}
+      },
+      "id": "new-x-search-id",
+      "name": "Get Mentions",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        1020
+      ],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "your-twitter-cred-id",
+          "name": "X Wellness Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "new-split-id",
+      "name": "Loop Over Mentions",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        140,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "tweet_text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "name": "user",
+              "value": "={{ $json.user.username }}",
+              "type": "string"
+            },
+            {
+              "name": "tweet_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "new-set-input-id",
+      "name": "Extract Tweet Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        380,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "jsonParameters": true,
+        "options": {},
+        "headerParametersJson": "{\"Authorization\":\"Bearer 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\", \"Content-Type\":\"application/json\"}",
+        "bodyParametersJson": "={{ {\"model\": \"gpt-4o\", \"messages\": [{\"role\": \"user\", \"content\": $json.tweet_text}]}} }}"
+      },
+      "id": "new-generate-response-id",
+      "name": "Generate Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        620,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "response_text",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "new-set-response-id",
+      "name": "Set Response Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "image_prompt",
+              "value": "exoticnote exotic bank note of vajunnie, text clearly says ‘VAJUNNIE MIND PALACE’, empty space in the center of the composition",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "new-set-prompt-id",
+      "name": "Set Image Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        380,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://fal.run/fal-ai/flux-lora",
+        "jsonParameters": true,
+        "options": {
+          "fullResponse": false
+        },
+        "headerParametersJson": "{\"Authorization\":\"Key b214afd9-07a8-4237-8c8c-5167c8559485:ce00c330d583fb14eb7bf0496ee8763f\", \"Content-Type\":\"application/json\"}",
+        "bodyParametersJson": "={{ {\"prompt\": $json.image_prompt, \"loras\": [{\"path\": \"72ku9ivf\", \"scale\": 1}], \"num_images\": 1, \"guidance_scale\": 3.5, \"enable_safety_checker\": false, \"image_size\": \"landscape_4_3\"} }}"
+      },
+      "id": "63eb4a3c-2f1b-47f3-98f3-fddbddbcdda6",
+      "name": "Generate Base Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        620,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "id": "new-download-id",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "={{ $json.response_text }}",
+        "positionX": 50,
+        "positionY": 50,
+        "fontSize": 24,
+        "fontFamily": "Arial",
+        "color": "#ffffff",
+        "additionalFields": {
+          "align": "center",
+          "width": 80,
+          "lineHeight": 1.2,
+          "fontWeight": "bold",
+          "strokeWidth": 2,
+          "strokeColor": "#000000"
+        }
+      },
+      "id": "new-edit-image-id",
+      "name": "Overlay Text",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "jsonParameters": true,
+        "options": {},
+        "headerParametersJson": "{\"Authorization\":\"Bearer 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\", \"Content-Type\":\"application/json\"}",
+        "bodyParametersJson": "={{ {\"model\": \"gpt-4o\", \"messages\": [{\"role\": \"user\", \"content\": \"Generate a short caption for this wellness response: \" + $json.response_text}]}} }}"
+      },
+      "id": "new-caption-generate-id",
+      "name": "Generate Caption",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "caption",
+              "value": "={{ $json.choices[0].message.content + \" from Vajunnie with love @\" + $json.user }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "new-set-caption-id",
+      "name": "Set Caption",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1340,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://upload.twitter.com/1.1/media/upload.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer AAAAAAAAAAAAAAAAAAAAAM2J3AEAAAAA%2B7qpOlg4Z93iIf1%2FMsNP%2BQ4fCbM%3DFnAgEvVKzKeXPjzBjp3yS1GGHCBidMkQlp6UuoOSeoqqN2CxOL"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "media",
+              "type": "file",
+              "value": "={{ $binary.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "new-media-upload-id",
+      "name": "Upload Media to X",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://api.twitter.com/2/tweets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_BEARER_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "jsonParameters": true,
+        "bodyParametersJson": "={{ {\"text\": $json.caption, \"reply\": {\"in_reply_to_tweet_id\": $json.tweet_id}, \"media\": {\"media_ids\": [$json.media_id_string]} } }}"
+      },
+      "id": "new-post-reply-id",
+      "name": "Post Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "id": "new-wait-id",
+      "name": "Rate Limit Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2060,
+        860
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "new-merge-id",
+      "name": "Merge Replies",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2300,
+        860
+      ]
+    },
+    {
       "parameters": {},
       "id": "50481228-c01d-4d22-8e9b-eb64d08ae0cd",
       "name": "Manual Trigger",
@@ -9,93 +343,8 @@
       "typeVersion": 1,
       "position": [
         -140,
-        1020
+        1300
       ]
-    },
-    {
-      "parameters": {
-        "requestMethod": "POST",
-        "url": "https://fal.run/fal-ai/flux-pro/kontext",
-        "options": {
-          "fullResponse": false
-        },
-        "bodyParametersUi": {
-          "parameter": [
-            {
-              "name": "=prompt",
-              "value": "={{ $json.prompt }}"
-            },
-            {
-              "name": "=image_url",
-              "value": "=https://v3.fal.media/files/elephant/VBIsXheultxcoJwBE3luf_IMG_2195.jpeg"
-            },
-            {
-              "name": "num_images",
-              "value": "1"
-            },
-            {
-              "name": "guidance_scale",
-              "value": "3.5"
-            },
-            {
-              "name": "safety_checker",
-              "value": "false"
-            },
-            {
-              "name": "aspect_ratio",
-              "value": "9:16"
-            }
-          ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "Authorization",
-              "value": "Key 5ff1c3a5-ad7d-4a1c-a29d-48c868b0fd7e:8bd25f59a623a06f690de0541f4876da"
-            },
-            {
-              "name": "Content-Type",
-              "value": " application/json"
-            }
-          ]
-        }
-      },
-      "id": "63eb4a3c-2f1b-47f3-98f3-fddbddbcdda6",
-      "name": "FAL FLUX",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 2,
-      "position": [
-        1080,
-        700
-      ]
-    },
-    {
-      "parameters": {
-        "resource": "assistant",
-        "assistantId": {
-          "__rl": true,
-          "value": "asst_INCQub3PNyuK70ShuOvTzkd0",
-          "mode": "list",
-          "cachedResultName": "vajunnie therapy + numerology twitter"
-        },
-        "prompt": "define",
-        "text": "={{$json[\"prompt\"]}}",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
-      "position": [
-        440,
-        720
-      ],
-      "id": "4dff96ad-3593-4d68-a61e-4694db698893",
-      "name": "therapy assistant",
-      "credentials": {
-        "openAiApi": {
-          "id": "kTWlML49D9NRlX7Z",
-          "name": "OpenAi account"
-        }
-      }
     },
     {
       "parameters": {
@@ -126,27 +375,194 @@
   ],
   "pinData": {},
   "connections": {
+    "Poll Mentions Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Mentions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Mentions": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Mentions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Mentions": {
+      "main": [
+        [
+          {
+            "node": "Merge Replies",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Tweet Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tweet Data": {
+      "main": [
+        [
+          {
+            "node": "Generate Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Image Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Response": {
+      "main": [
+        [
+          {
+            "node": "Set Response Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Response Text": {
+      "main": [
+        [
+          {
+            "node": "Generate Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Image Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Base Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Base Image": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Overlay Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Overlay Text": {
+      "main": [
+        [
+          {
+            "node": "Upload Media to X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Caption": {
+      "main": [
+        [
+          {
+            "node": "Set Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Caption": {
+      "main": [
+        [
+          {
+            "node": "Upload Media to X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Media to X": {
+      "main": [
+        [
+          {
+            "node": "Post Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Reply": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Mentions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Manual Trigger": {
-      "main": [
-        []
-      ]
-    },
-    "FAL FLUX": {
-      "main": [
-        []
-      ]
-    },
-    "therapy assistant": {
       "main": [
         []
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d2c0a644-6636-45cc-a8df-6f3631711014",
+  "versionId": "new-version-id",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7ab78dc711d7f4eb4d22087161c59a5336f9266bf683291ae9215acd6515cdc8"
