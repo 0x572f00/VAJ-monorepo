@@ -1,0 +1,156 @@
+{
+  "name": "vajunnie numerology + therapy twitter bot",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "50481228-c01d-4d22-8e9b-eb64d08ae0cd",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://fal.run/fal-ai/flux-pro/kontext",
+        "options": {
+          "fullResponse": false
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "=prompt",
+              "value": "={{ $json.prompt }}"
+            },
+            {
+              "name": "=image_url",
+              "value": "=https://v3.fal.media/files/elephant/VBIsXheultxcoJwBE3luf_IMG_2195.jpeg"
+            },
+            {
+              "name": "num_images",
+              "value": "1"
+            },
+            {
+              "name": "guidance_scale",
+              "value": "3.5"
+            },
+            {
+              "name": "safety_checker",
+              "value": "false"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "9:16"
+            }
+          ]
+        },
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "Key 5ff1c3a5-ad7d-4a1c-a29d-48c868b0fd7e:8bd25f59a623a06f690de0541f4876da"
+            },
+            {
+              "name": "Content-Type",
+              "value": " application/json"
+            }
+          ]
+        }
+      },
+      "id": "63eb4a3c-2f1b-47f3-98f3-fddbddbcdda6",
+      "name": "FAL FLUX",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_INCQub3PNyuK70ShuOvTzkd0",
+          "mode": "list",
+          "cachedResultName": "vajunnie therapy + numerology twitter"
+        },
+        "prompt": "define",
+        "text": "={{$json[\"prompt\"]}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        440,
+        720
+      ],
+      "id": "4dff96ad-3593-4d68-a61e-4694db698893",
+      "name": "therapy assistant",
+      "credentials": {
+        "openAiApi": {
+          "id": "kTWlML49D9NRlX7Z",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "user tweet gets fed in here"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        360,
+        980
+      ],
+      "id": "44075032-e2c6-4ee7-8b5d-783fa6628416",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "image gets generated here, needs to access a different api endpoint than currently configured"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        880
+      ],
+      "id": "d6d4fbec-ca5b-429a-b77e-748606b3d6b6",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "FAL FLUX": {
+      "main": [
+        []
+      ]
+    },
+    "therapy assistant": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2c0a644-6636-45cc-a8df-6f3631711014",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ab78dc711d7f4eb4d22087161c59a5336f9266bf683291ae9215acd6515cdc8"
+  },
+  "id": "ocHkGEsx8XzSfPus",
+  "tags": []
+}
