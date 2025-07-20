@@ -18,7 +18,7 @@ MAX_USES_PER_DAY = 10
 
 # Configure FAL API
 os.environ["FAL_KEY"] = "c96cf91d-c066-437f-b3c5-9bb0f46b3313:d301951fae038237fdba3532a9e07843"
-DEFAULT_LORA = "https://v3.fal.media/files/monkey/WJzfPtEbCoNV-nCanhQek_pytorch_lora_weights.safetensors"
+DEFAULT_LORA = "https://github.com/0x572f00/VAJ-monorepo/raw/refs/heads/main/lora/vajunnie.safetensors"
 
 VALID_PARAMS = {
     "image_size": {
